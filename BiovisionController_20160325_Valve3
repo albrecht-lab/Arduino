@@ -14,7 +14,6 @@ Valves can be controlled specifically with the serial commands:
    can also interlace:
    e.g. 50,i100,100,i0 means turn on to 100/255 power at frame 50, then off at frame 100
 
-Also available on https://codebender.cc/sketch:246356
 **/
 
 /***************************************************
@@ -54,8 +53,8 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 #define LED2 6	//  PWM for adjustable LED intensity
 
 #define VALVE1 A0	// TTL for valves, high = open
-#define VALVE2 A2
-#define VALVE3 A4
+#define VALVE3 A2
+#define VALVE5 A1
 
 #define INPUT_SIZE 128 // max input serial string size
 #define MAX_SWITCHES 32 // max number of switch frames
@@ -80,8 +79,9 @@ byte testHz = 10;					// test signal frequency
 long int BFmicros = 5;				// brightfield illumination pulse duration (us)
 
 // Initialize variables
-int valve1state = LOW;         // default valve 1 off
-int valve2state = HIGH;        // default valve 2 ON
+int valve1state = HIGH;         // default valve 1 off
+int valve3state = HIGH;        // default valve 3 ON
+int valve5state = LOW;        // default valve 5 OFF
 int outputstate = FL_OFF;      // default value for Fluorescence (FL) output
 int LEDlevel = 0; 			   // default value for LED1
 
@@ -128,14 +128,14 @@ void setup()
 	pinMode(TRIGGERIN, INPUT);
 	pinMode(TRIGGEROUT, OUTPUT);
 	pinMode(VALVE1, OUTPUT);
-	pinMode(VALVE2, OUTPUT);
 	pinMode(VALVE3, OUTPUT);
+	pinMode(VALVE5, OUTPUT);
 	pinMode(LED1, OUTPUT);
 
 	digitalWrite(TRIGGEROUT, outputstate);
 	digitalWrite(VALVE1, valve1state);
-	digitalWrite(VALVE2, valve2state);
-	digitalWrite(VALVE3, LOW);
+	digitalWrite(VALVE3, valve3state);
+	digitalWrite(VALVE5, valve5state);
 
 	digitalWrite(LED1, LOW);
 
@@ -196,12 +196,19 @@ void loop()
 				Serial.print("Valve 1 switch to: ");
 				Serial.println(valve1state);
 			}
+			else if (valvenum == 3)
+			{
+				valve3state = (strchr(input, 'on') != 0);
+				digitalWrite(VALVE3, valve3state);
+				Serial.print("Valve 3 switch to: ");
+				Serial.println(valve3state);
+			}
 			else if (valvenum == 2)
 			{
-				valve2state = (strchr(input, 'on') != 0);
-				digitalWrite(VALVE2, valve2state);
-				Serial.print("Valve 2 switch to: ");
-				Serial.println(valve2state);
+				valve5state = (strchr(input, 'on') != 0);
+				digitalWrite(VALVE5, valve5state);
+				Serial.print("Valve 5 switch to: ");
+				Serial.println(valve5state);
 			}
 			timingEntry = false;
 		}
@@ -265,14 +272,15 @@ void loop()
 				pulseCount = -2;                  	// Initialize pulse count
 				valveSwitchCount = 0;            	// Initialize valve switch count
 				digitalWrite(VALVE1, LOW);    		// Initialize valve 1 off
-				digitalWrite(VALVE2, valve2state);  // Initialize valve 2
+				digitalWrite(VALVE3, valve3state);  // Initialize valve 2
+				digitalWrite(VALVE5, valve5state);  // Initialize valve 3
 				//digitalWrite(LED1, LOW);    		// Initialize LED off
 			
 				tft.fillRect(1,45,tft.width(),4,ILI9341_BLACK);
 				tft.fillRect(xos,yos,64,48,ILI9341_BLACK);
 			
 				displayGraph(30,65,"V1",OnOffFrames,V1states,1,10.0);
-				displayGraph(30,90,"V2",OnOffFrames,V1states,-1000,-0.01);
+				displayGraph(30,90,"V3",OnOffFrames,V1states,-1000,-0.01);
 				//displayGraph(30,115,"V3",OnOffFrames,V1states,-1000,-0.01);
 				//displayGraph(30,140,"V4",OnOffFrames,V1states,-1000,-0.01);
 				//displayGraph(30,180,"LED1",OnOffFrames,Intensity,255,0.1);
@@ -345,7 +353,7 @@ void loop()
 			tft.setCursor(xos+ 0 * 6, yos+ 3 * 8);
 			tft.print("v1:");
 			tft.setCursor(xos+ 0 * 6, yos+ 4 * 8);
-			tft.print("v2:");
+			tft.print("v3:");
 		}
 		tft.setCursor(xos+ 0 * 6, yos+ 1 * 8);
 		tft.print(pulseCount); tft.print(" ");
@@ -354,7 +362,7 @@ void loop()
 		tft.setCursor(xos+ 3 * 6, yos+ 3 * 8);
 		tft.print(valve1state);
 		tft.setCursor(xos+ 3 * 6, yos+ 4 * 8);
-		tft.print(valve2state);
+		tft.print(valve3state);
 		tft.setCursor(xos+ 6 * 6, yos+ 4 * 8);
 		tft.print(LEDlevel); tft.print("  ");
 		if (pulseCount % (int) fps == 0) {			// display fps every ~1s
