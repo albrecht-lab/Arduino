@@ -1,6 +1,5 @@
 /*
 This is the final WORKING code for the servo-multiWell plate controller
-Also available on https://codebender.cc/sketch:247533
 For use with the Adafruit Motor Shield v2
 ---->	http://www.adafruit.com/products/1438
 */
@@ -57,8 +56,8 @@ void setup()
 
 	AFMS.begin();  // create with the default frequency 1.6KHz
 
-	xMotor->setSpeed(200);  // rpm
-	yMotor->setSpeed(200);  // rpm
+	xMotor->setSpeed(100);  // rpm
+	yMotor->setSpeed(100);  // rpm
 
 	servo.attach(zPosPin);
 
@@ -88,7 +87,7 @@ void loop()
 
 		//zServo.writeMicroseconds(upZpos);
 		servo.write(70); // move to up position
-		delay(100);
+		delay(500);
 
 		if (newypos == -16)    // '0' to home and move to well A1
 		{
@@ -139,7 +138,7 @@ void loop()
 		yMotor->release();
 
 		// Handle z-position
-		delay(300);
+		delay(500);
 		if (z == '+')
 		{
 			//zServo.writeMicroseconds(upZpos);
@@ -153,7 +152,7 @@ void loop()
 			Serial.print(z);
 		}
 
-		delay(300);
+		delay(500);
 		// Send serial command to confirm new position and motor completion
 		Serial.print(row);
 		Serial.print(col);
@@ -199,7 +198,7 @@ int readLimitSwitches()
 	int limitState  = !digitalRead(xMinLimitPin) * 8;
 	limitState += !digitalRead(xMaxLimitPin) * 4;
 	limitState += !digitalRead(yMinLimitPin) * 2;
-	limitState += !digitalRead(yMaxLimitPin) * 1;
+	limitState += !digitalRead(yMaxLimitPin) * 2;//1;
 
 	return limitState;
 }
